@@ -1,3 +1,5 @@
+// app/components/kudo.tsx
+
 import { UserCircle } from '~/components/user-circle';
 import { Profile, Kudo as IKudo } from '@prisma/client';
 import { colorMap, backgroundColorMap, emojiMap } from '~/utils/constants';

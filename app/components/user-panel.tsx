@@ -1,13 +1,11 @@
 import { User } from '@prisma/client';
-import { UserCircle } from '~/components/user-circle';
 import { useNavigate } from '@remix-run/react';
+import { UserCircle } from '../components/user-circle';
 
-interface props {
-  users: User[];
-}
-
-export function UserPanel({ users }: props) {
+// app/components/user-panel.tsx
+export function UserPanel({ users }: { users: User[] }) {
   const navigate = useNavigate();
+
   return (
     <div className='w-1/6 bg-gray-200 flex flex-col'>
       <div className='text-center bg-gray-300 h-20 flex items-center justify-center'>

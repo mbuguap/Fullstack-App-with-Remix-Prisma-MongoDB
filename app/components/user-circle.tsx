@@ -1,3 +1,4 @@
+// app/components/user-circle.tsx
 import { Profile } from '@prisma/client';
 
 interface props {

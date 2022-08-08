@@ -18,11 +18,9 @@ export function FormField({
   error = '',
 }: FormFieldProps) {
   const [errorText, setErrorText] = useState(error);
-
   useEffect(() => {
     setErrorText(error);
   }, [error]);
-
   return (
     <>
       <label htmlFor={htmlFor} className='text-blue-600 font-semibold'>

@@ -1,6 +1,8 @@
-import { redirect, json, createCookieSessionStorage } from '@remix-run/node';
-import { RegisterForm, LoginForm } from './types.server';
+// app/utils/auth.server.ts
+
+import type { LoginForm, RegisterForm } from './types.server';
 import { prisma } from './prisma.server';
+import { redirect, json, createCookieSessionStorage } from '@remix-run/node';
 import { createUser } from './user.server';
 import bcrypt from 'bcryptjs';
 
@@ -40,18 +42,21 @@ export async function register(user: RegisterForm) {
       { status: 400 }
     );
   }
+
   return createUserSession(newUser.id, '/');
 }
 
-// Validate the user on email & password
 export async function login({ email, password }: LoginForm) {
+  // 2
   const user = await prisma.user.findUnique({
     where: { email },
   });
 
+  // 3
   if (!user || !(await bcrypt.compare(password, user.password)))
     return json({ error: `Incorrect login` }, { status: 400 });
 
+  // 4
   return createUserSession(user.id, '/');
 }
 

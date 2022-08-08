@@ -1,27 +1,37 @@
-import type { LoaderFunction } from '@remix-run/node';
-import { Modal } from '~/components/modal';
+// app/routes/home/profile.tsx
 
-import { useLoaderData, useActionData } from '@remix-run/react';
-import { useState, useRef, useEffect } from 'react';
-import { FormField } from '~/components/form-field';
-import { departments } from '~/utils/constants';
-import { SelectBox } from '~/components/select-box';
-
-import { validateName } from '~/utils/validators.server';
-import type { ActionFunction } from '@remix-run/node';
-import { redirect, json } from '@remix-run/node';
-import { getUser, requireUserId, logout } from '~/utils/auth.server';
+import {
+  ActionFunction,
+  json,
+  LoaderFunction,
+  redirect,
+} from '@remix-run/node';
+import { useActionData, useLoaderData } from '@remix-run/react';
+import { useEffect, useRef, useState } from 'react';
+import { FormField } from '../../components/form-field';
+import { Modal } from '../../components/modal';
+import { SelectBox } from '../../components/select-box';
+import { getUser, logout, requireUserId } from '../../utils/auth.server';
+import { departments } from '../../utils/constants';
+import { updateUser, deleteUser } from '../../utils/user.server';
+import { validateName } from '../../utils/validators.server';
 import type { Department } from '@prisma/client';
-import { ImageUploader } from '~/components/image-uploader';
-import { updateUser, deleteUser } from '~/utils/user.server';
+import { ImageUploader } from '../../components/image-uploader';
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await getUser(request);
+  return json({ user });
+};
 
 export const action: ActionFunction = async ({ request }) => {
-  const userId = await requireUserId(request);
   const form = await request.formData();
+  const userId = await requireUserId(request);
 
+  // 1
   let firstName = form.get('firstName');
   let lastName = form.get('lastName');
   let department = form.get('department');
+
   const action = form.get('_action');
 
   switch (action) {
@@ -33,19 +43,16 @@ export const action: ActionFunction = async ({ request }) => {
       ) {
         return json({ error: `Invalid Form Data` }, { status: 400 });
       }
-
       const errors = {
         firstName: validateName(firstName),
         lastName: validateName(lastName),
         department: validateName(department),
       };
-
       if (Object.values(errors).some(Boolean))
         return json(
           { errors, fields: { department, firstName, lastName } },
           { status: 400 }
         );
-
       await updateUser(userId, {
         firstName,
         lastName,
@@ -60,13 +67,10 @@ export const action: ActionFunction = async ({ request }) => {
   }
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const user = await getUser(request);
-  return json({ user });
-};
-
 export default function ProfileSettings() {
   const { user } = useLoaderData();
+
+  // 2
   const actionData = useActionData();
   const [formError, setFormError] = useState(actionData?.error || '');
   const firstLoad = useRef(true);
@@ -80,6 +84,30 @@ export default function ProfileSettings() {
     profilePicture: user?.profile?.profilePicture || '',
   });
 
+  const handleFileUpload = async (file: File) => {
+    let inputFormData = new FormData();
+    inputFormData.append('profile-pic', file);
+
+    const response = await fetch('/avatar', {
+      method: 'POST',
+      body: inputFormData,
+    });
+
+    const { imageUrl } = await response.json();
+    setFormData({
+      ...formData,
+      profilePicture: imageUrl,
+    });
+  };
+
+  // 3
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    field: string
+  ) => {
+    setFormData((form) => ({ ...form, [field]: event.target.value }));
+  };
+
   useEffect(() => {
     if (!firstLoad.current) {
       setFormError('');
@@ -89,29 +117,6 @@ export default function ProfileSettings() {
   useEffect(() => {
     firstLoad.current = false;
   }, []);
-
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    field: string
-  ) => {
-    setFormData((form) => ({ ...form, [field]: event.target.value }));
-  };
-
-  const handleFileUpload = async (file: File) => {
-    let inputFormData = new FormData();
-    inputFormData.append('profile-pic', file);
-
-    const response = await fetch('/avatar', {
-      method: 'POST',
-      body: inputFormData,
-    });
-    const { imageUrl } = await response.json();
-
-    setFormData({
-      ...formData,
-      profilePicture: imageUrl,
-    });
-  };
 
   return (
     <Modal isOpen={true} className='w-1/3'>
@@ -168,9 +173,9 @@ export default function ProfileSettings() {
               </button>
               <div className='w-full text-right mt-4'>
                 <button
+                  className='rounded-xl bg-yellow-300 font-semibold text-blue-600 px-16 py-2 transition duration-300 ease-in-out hover:bg-yellow-400 hover:-translate-y-1'
                   name='_action'
                   value='save'
-                  className='rounded-xl bg-yellow-300 font-semibold text-blue-600 px-16 py-2 transition duration-300 ease-in-out hover:bg-yellow-400 hover:-translate-y-1'
                 >
                   Save
                 </button>

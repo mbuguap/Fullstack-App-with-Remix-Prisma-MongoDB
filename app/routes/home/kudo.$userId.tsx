@@ -1,13 +1,4 @@
-import { getUserById } from '~/utils/user.server';
-import { Modal } from '~/components/modal';
-import { getUser } from '~/utils/auth.server';
-
-import { useLoaderData, useActionData } from '@remix-run/react';
-import { UserCircle } from '~/components/user-circle';
-import { useState } from 'react';
-import { SelectBox } from '~/components/select-box';
-import { colorMap, emojiMap } from '~/utils/constants';
-import { Kudo } from '~/components/kudo';
+// app/routes/home/kudo.$userId.tsx
 
 import {
   ActionFunction,
@@ -15,32 +6,40 @@ import {
   LoaderFunction,
   redirect,
 } from '@remix-run/node';
-import { createKudo } from '~/utils/kudos.server';
+import { useActionData, useLoaderData } from '@remix-run/react';
+import { getUserById } from '../../utils/user.server';
+import { Modal } from '../../components/modal';
+import { getUser, requireUserId } from '../../utils/auth.server';
 import { Color, Emoji, KudoStyle } from '@prisma/client';
-import { requireUserId } from '~/utils/auth.server';
+import { useState } from 'react';
+import { UserCircle } from '../../components/user-circle';
+import { colorMap, emojiMap } from '../../utils/constants';
+import { SelectBox } from '../../components/select-box';
+import { Kudo } from '../../components/kudo';
+import { createKudo } from '../../utils/kudos.server';
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { userId } = params;
-  const user = await getUser(request);
 
   if (typeof userId !== 'string') {
     return redirect('/home');
   }
 
+  const user = await getUser(request);
   const recipient = await getUserById(userId);
   return json({ recipient, user });
 };
 
 export const action: ActionFunction = async ({ request }) => {
-  const form = await request.formData();
   const userId = await requireUserId(request);
-
+  // 2
+  const form = await request.formData();
   const message = form.get('message');
   const backgroundColor = form.get('backgroundColor');
   const textColor = form.get('textColor');
   const emoji = form.get('emoji');
   const recipientId = form.get('recipientId');
-
+  // 3
   if (
     typeof message !== 'string' ||
     typeof recipientId !== 'string' ||
@@ -50,25 +49,24 @@ export const action: ActionFunction = async ({ request }) => {
   ) {
     return json({ error: `Invalid Form Data` }, { status: 400 });
   }
-
   if (!message.length) {
     return json({ error: `Please provide a message.` }, { status: 400 });
   }
-
   if (!recipientId.length) {
     return json({ error: `No recipient found...` }, { status: 400 });
   }
-
+  // 4
   await createKudo(message, userId, recipientId, {
     backgroundColor: backgroundColor as Color,
     textColor: textColor as Color,
     emoji: emoji as Emoji,
   });
-
+  // 5
   return redirect('/home');
 };
 
 export default function KudoModal() {
+  // 2
   const actionData = useActionData();
   const [formError] = useState(actionData?.error || '');
   const [formData, setFormData] = useState({
@@ -80,6 +78,7 @@ export default function KudoModal() {
     } as KudoStyle,
   });
 
+  // 3
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: string
@@ -114,6 +113,7 @@ export default function KudoModal() {
 
   const { recipient, user } = useLoaderData();
 
+  // 4
   return (
     <Modal isOpen={true} className='w-2/3 p-10'>
       <div className='text-xs font-semibold text-center tracking-wide text-red-500 w-full mb-2'>

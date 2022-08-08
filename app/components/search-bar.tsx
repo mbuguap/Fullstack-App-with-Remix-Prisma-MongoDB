@@ -1,9 +1,10 @@
-import { useNavigate, useSearchParams } from '@remix-run/react';
-import { SelectBox } from './select-box';
-import { sortOptions } from '~/utils/constants';
+// app/components/search-bar.tsx
 
+import { Profile } from '@prisma/client';
+import { useNavigate, useSearchParams } from '@remix-run/react';
+import { sortOptions } from '~/utils/constants';
+import { SelectBox } from './select-box';
 import { UserCircle } from './user-circle';
-import type { Profile } from '@prisma/client';
 
 interface props {
   profile: Profile;

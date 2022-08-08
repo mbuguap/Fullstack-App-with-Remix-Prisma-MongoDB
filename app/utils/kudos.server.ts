@@ -1,3 +1,5 @@
+// app/utils/kudos.server.ts
+
 import { prisma } from './prisma.server';
 import { KudoStyle, Prisma } from '@prisma/client';
 
@@ -9,7 +11,10 @@ export const createKudo = async (
 ) => {
   await prisma.kudo.create({
     data: {
+      // 1
       message,
+      style,
+      // 2
       author: {
         connect: {
           id: userId,
@@ -20,7 +25,6 @@ export const createKudo = async (
           id: recipientId,
         },
       },
-      style,
     },
   });
 };

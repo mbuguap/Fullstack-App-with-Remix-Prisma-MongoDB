@@ -1,3 +1,5 @@
+// app/utils/constants.ts
+
 export const colorMap = {
   RED: 'text-red-400',
   GREEN: 'text-green-400',

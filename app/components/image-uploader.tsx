@@ -1,3 +1,5 @@
+// app/components/image-uploader.tsx
+
 import React, { useRef, useState } from 'react';
 
 interface props {
