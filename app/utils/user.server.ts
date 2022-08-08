@@ -27,5 +27,13 @@ export const getOtherUsers = async (userId: string) => {
         firstName: 'asc',
       },
     },
+  })
+}
+
+export const getUserById = async (userId: string) => {
+  return await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
   });
 };
