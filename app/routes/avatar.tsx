@@ -5,7 +5,6 @@ import { prisma } from '~/utils/prisma.server';
 
 export const action: ActionFunction = async ({ request }) => {
   const userId = await requireUserId(request);
-
   const imageUrl = await uploadAvatar(request);
 
   await prisma.user.update({

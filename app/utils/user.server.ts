@@ -1,7 +1,7 @@
-import bcrypt from "bcryptjs";
-import type { RegisterForm } from "./types.server";
-import { prisma } from "./prisma.server";
-import type { Profile } from "@prisma/client";
+import bcrypt from 'bcryptjs';
+import type { RegisterForm } from './types.server';
+import { prisma } from './prisma.server';
+import type { Profile } from '@prisma/client';
 
 export const createUser = async (user: RegisterForm) => {
   const passwordHash = await bcrypt.hash(user.password, 10);
@@ -25,7 +25,7 @@ export const getOtherUsers = async (userId: string) => {
     },
     orderBy: {
       profile: {
-        firstName: "asc",
+        firstName: 'asc',
       },
     },
   });
