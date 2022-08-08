@@ -1,5 +1,5 @@
-import { prisma } from './prisma.server';
-import { KudoStyle, Prisma } from '@prisma/client';
+import { prisma } from "./prisma.server";
+import { KudoStyle, Prisma } from "@prisma/client";
 
 export const createKudo = async (
   message: string,
@@ -10,8 +10,6 @@ export const createKudo = async (
   await prisma.kudo.create({
     data: {
       message,
-      style,
-
       author: {
         connect: {
           id: userId,
@@ -22,6 +20,7 @@ export const createKudo = async (
           id: recipientId,
         },
       },
+      style,
     },
   });
 };
@@ -48,6 +47,28 @@ export const getFilteredKudos = async (
     where: {
       recipientId: userId,
       ...whereFilter,
+    },
+  });
+};
+
+export const getRecentKudos = async () => {
+  return await prisma.kudo.findMany({
+    take: 3,
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      style: {
+        select: {
+          emoji: true,
+        },
+      },
+      recipient: {
+        select: {
+          id: true,
+          profile: true,
+        },
+      },
     },
   });
 };

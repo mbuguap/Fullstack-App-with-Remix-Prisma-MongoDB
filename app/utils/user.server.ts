@@ -1,6 +1,6 @@
-import bcrypt from 'bcryptjs';
-import type { RegisterForm } from './types.server';
-import { prisma } from './prisma.server';
+import bcrypt from "bcryptjs";
+import { RegisterForm } from "./types.server";
+import { prisma } from "./prisma.server";
 
 export const createUser = async (user: RegisterForm) => {
   const passwordHash = await bcrypt.hash(user.password, 10);
@@ -18,17 +18,17 @@ export const createUser = async (user: RegisterForm) => {
 };
 
 export const getOtherUsers = async (userId: string) => {
-  return prisma.user.findMany({
+  return await prisma.user.findMany({
     where: {
       id: { not: userId },
     },
     orderBy: {
       profile: {
-        firstName: 'asc',
+        firstName: "asc",
       },
     },
-  })
-}
+  });
+};
 
 export const getUserById = async (userId: string) => {
   return await prisma.user.findUnique({
